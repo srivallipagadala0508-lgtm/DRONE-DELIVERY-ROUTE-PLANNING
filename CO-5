@@ -1,0 +1,29 @@
+# Probability of bad weather
+P_bad_weather = 0.3
+
+# Sensor detects obstacle when weather is bad
+P_sensor_given_bad = 0.8
+
+# Sensor detects obstacle when weather is good
+P_sensor_given_good = 0.2
+
+# Total Probability Formula
+P_sensor = (
+    P_sensor_given_bad * P_bad_weather
+    + P_sensor_given_good * (1 - P_bad_weather)
+)
+
+# Bayes Rule Formula
+P_bad_given_sensor = (
+    P_sensor_given_bad * P_bad_weather
+) / P_sensor
+
+# Display result
+print("Probability of Bad Weather Given Sensor Alert:")
+print(round(P_bad_given_sensor, 2))
+
+# Decision Making
+if P_bad_given_sensor > 0.6:
+    print("Drone Decision: Avoid Route")
+else:
+    print("Drone Decision: Safe to Deliver")
