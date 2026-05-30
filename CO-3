@@ -1,0 +1,299 @@
+# ---------------------------------------------------------
+# CO3 - Constraint Satisfaction Problem (CSP)
+# Drone Delivery Route Planning
+# ---------------------------------------------------------
+
+routes = {
+    "Route1": [
+        "Warehouse",
+        "ZoneA",
+        "ZoneC",
+        "Customer"
+    ],
+
+    "Route2": [
+        "Warehouse",
+        "ZoneB",
+        "ZoneD",
+        "Customer"
+    ]
+}
+
+# ---------------------------------------------------------
+# Route Details
+# ---------------------------------------------------------
+
+route_details = {
+    "Route1": {
+        "battery": 9,
+        "time": 14,
+        "weather": "Clear"
+    },
+
+    "Route2": {
+        "battery": 11,
+        "time": 12,
+        "weather": "Windy"
+    }
+}
+
+# ---------------------------------------------------------
+# Constraints
+# ---------------------------------------------------------
+
+MAX_BATTERY = 10
+MAX_TIME = 15
+
+NO_FLY_ZONES = {
+    "ZoneD"
+}
+
+# ---------------------------------------------------------
+# Explainability Logs
+# ---------------------------------------------------------
+
+explanation_logs = []
+
+# ---------------------------------------------------------
+# Constraint Checking Function
+# ---------------------------------------------------------
+
+def is_valid_route(route_name):
+
+    route = routes[route_name]
+    details = route_details[route_name]
+
+    print(f"\nChecking {route_name}")
+    print("Path:", " -> ".join(route))
+
+    # Battery Constraint
+    print(f"Battery Required : {details['battery']}")
+    print(f"Battery Limit    : {MAX_BATTERY}")
+
+    if details["battery"] > MAX_BATTERY:
+
+        print("Battery Status   : Failed")
+
+        explanation_logs.append(
+            f"Rejected {route_name} because battery requirement exceeded."
+        )
+
+        return False
+
+    else:
+        print("Battery Status   : Passed")
+
+    # Time Constraint
+    print(f"Delivery Time    : {details['time']}")
+    print(f"Time Limit       : {MAX_TIME}")
+
+    if details["time"] > MAX_TIME:
+
+        print("Time Status      : Failed")
+
+        explanation_logs.append(
+            f"Rejected {route_name} because delivery deadline exceeded."
+        )
+
+        return False
+
+    else:
+        print("Time Status      : Passed")
+
+    # No-Fly Zone Constraint
+    for location in route:
+
+        if location in NO_FLY_ZONES:
+
+            print(f"No-Fly Status    : Failed ({location} is restricted)")
+
+            explanation_logs.append(
+                f"Rejected {route_name} because {location} is a No-Fly Zone."
+            )
+
+            return False
+
+    print("No-Fly Status    : Passed")
+
+    # Weather Constraint
+    if details["weather"] == "Windy":
+
+        print("Weather Status   : Warning - Windy route")
+
+        explanation_logs.append(
+            f"{route_name} has windy weather condition."
+        )
+
+    else:
+        print("Weather Status   : Passed")
+
+    return True
+
+# ---------------------------------------------------------
+# Forward Checking
+# ---------------------------------------------------------
+
+def forward_checking(route_names):
+
+    valid_routes = []
+
+    for route_name in route_names:
+
+        if is_valid_route(route_name):
+
+            valid_routes.append(route_name)
+
+    return valid_routes
+
+# ---------------------------------------------------------
+# MRV Heuristic
+# Chooses route with minimum battery usage among valid routes
+# ---------------------------------------------------------
+
+def select_route_mrv(valid_routes):
+
+    selected_route = None
+    smallest_battery = float("inf")
+
+    for route_name in valid_routes:
+
+        battery = route_details[route_name]["battery"]
+
+        if battery < smallest_battery:
+
+            smallest_battery = battery
+            selected_route = route_name
+
+    return selected_route
+
+# ---------------------------------------------------------
+# Backtracking Search
+# ---------------------------------------------------------
+
+def backtracking(valid_routes):
+
+    for route_name in valid_routes:
+
+        explanation_logs.append(
+            f"Trying {route_name} during backtracking."
+        )
+
+        if is_valid_route(route_name):
+
+            explanation_logs.append(
+                f"Assigned {route_name} as final delivery route."
+            )
+
+            return route_name
+
+        explanation_logs.append(
+            f"Backtracking from {route_name}."
+        )
+
+    return None
+
+# ---------------------------------------------------------
+# Main Program
+# ---------------------------------------------------------
+
+print("========================================")
+print("DRONE DELIVERY ROUTE PLANNING")
+print("CO3 - CSP MODULE")
+print("========================================")
+
+# ---------------------------------------------------------
+# Display Routes
+# ---------------------------------------------------------
+
+print("\nAvailable Routes:\n")
+
+for route_name, path in routes.items():
+
+    print(route_name, ":", " -> ".join(path))
+
+# ---------------------------------------------------------
+# Display Constraints
+# ---------------------------------------------------------
+
+print("\nConstraints Applied:\n")
+print("Maximum Battery Allowed :", MAX_BATTERY)
+print("Maximum Delivery Time   :", MAX_TIME)
+print("No-Fly Zones            :", NO_FLY_ZONES)
+
+# ---------------------------------------------------------
+# Forward Checking
+# ---------------------------------------------------------
+
+print("\n========================================")
+print("FORWARD CHECKING RESULTS")
+print("========================================")
+
+filtered_routes = forward_checking(routes.keys())
+
+print("\nValid Routes After Forward Checking:")
+
+if filtered_routes:
+
+    for route_name in filtered_routes:
+        print(route_name)
+
+else:
+    print("No valid route found.")
+
+# ---------------------------------------------------------
+# MRV Heuristic
+# ---------------------------------------------------------
+
+print("\n========================================")
+print("MRV HEURISTIC RESULT")
+print("========================================")
+
+mrv_route = select_route_mrv(filtered_routes)
+
+print("MRV Selected Route:", mrv_route)
+
+# ---------------------------------------------------------
+# Backtracking Search
+# ---------------------------------------------------------
+
+print("\n========================================")
+print("BACKTRACKING SOLUTION")
+print("========================================")
+
+solution = backtracking(filtered_routes)
+
+print("\nFinal CSP Solution:", solution)
+
+# ---------------------------------------------------------
+# Final Route Details
+# ---------------------------------------------------------
+
+print("\n========================================")
+print("SELECTED ROUTE DETAILS")
+print("========================================")
+
+if solution:
+
+    print("Path          :", " -> ".join(routes[solution]))
+    print("Battery Usage :", route_details[solution]["battery"])
+    print("Delivery Time :", route_details[solution]["time"])
+    print("Weather       :", route_details[solution]["weather"])
+
+else:
+    print("No route satisfies all constraints.")
+
+# ---------------------------------------------------------
+# Explainability Logs
+# ---------------------------------------------------------
+
+print("\n========================================")
+print("EXPLAINABILITY LOGS")
+print("========================================")
+
+for log in explanation_logs:
+
+    print(log)
+
+print("\n========================================")
+print("CSP PROCESS COMPLETED")
+print("========================================")
