@@ -1,0 +1,105 @@
+# Importing Priority Queue for A* Algorithm
+from queue import PriorityQueue
+
+# Grid Representation
+# 0 = free path
+# 1 = obstacle
+grid = [
+    [0, 0, 0, 1, 0],
+    [0, 1, 0, 1, 0],
+    [0, 1, 0, 0, 0],
+    [0, 0, 1, 1, 0],
+    [0, 0, 0, 0, 0]
+]
+
+# Starting and Goal positions
+start = (0, 0)
+goal = (4, 4)
+
+# Heuristic Function
+# Manhattan Distance Formula
+def heuristic(a, b):
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+# A* Search Algorithm
+def astar(grid, start, goal):
+
+    rows = len(grid)
+    cols = len(grid[0])
+
+    # Priority Queue stores nodes
+    pq = PriorityQueue()
+
+    # Insert starting node
+    pq.put((0, start))
+
+    # Stores path tracking
+    came_from = {}
+
+    # Stores cost values
+    cost_so_far = {}
+
+    came_from[start] = None
+    cost_so_far[start] = 0
+
+    # Possible movements
+    directions = [(-1,0),(1,0),(0,-1),(0,1)]
+
+    while not pq.empty():
+
+        current = pq.get()[1]
+
+        # Goal reached
+        if current == goal:
+            break
+
+        for d in directions:
+
+            nx = current[0] + d[0]
+            ny = current[1] + d[1]
+
+            # Boundary check
+            if 0 <= nx < rows and 0 <= ny < cols:
+
+                # Ignore obstacles
+                if grid[nx][ny] == 1:
+                    continue
+
+                # Cost calculation
+                new_cost = cost_so_far[current] + 1
+
+                next_node = (nx, ny)
+
+                # Update smaller cost path
+                if next_node not in cost_so_far or new_cost < cost_so_far[next_node]:
+
+                    cost_so_far[next_node] = new_cost
+
+                    # Priority = path cost + heuristic
+                    priority = new_cost + heuristic(goal, next_node)
+
+                    pq.put((priority, next_node))
+
+                    came_from[next_node] = current
+
+    # Path Reconstruction
+    path = []
+
+    node = goal
+
+    while node:
+        path.append(node)
+        node = came_from[node]
+
+    path.reverse()
+
+    return path
+
+# Execute Algorithm
+path = astar(grid, start, goal)
+
+# Display Output
+print("Optimal Drone Delivery Path:")
+print(path)
+
+print("Total Steps:", len(path)-1)
