@@ -1,0 +1,75 @@
+# Importing math library for infinity values
+import math
+
+# Delivery locations with reward values
+delivery_points = {
+    "A": 50,
+    "B": 30,
+    "C": 70,
+    "D": 40
+}
+
+# Risk values due to weather or obstacles
+risk_factor = {
+    "A": 10,
+    "B": 20,
+    "C": 15,
+    "D": 5
+}
+
+# Utility Function
+# Calculates final profit after reducing risk
+def utility(location):
+    return delivery_points[location] - risk_factor[location]
+
+# Minimax Algorithm
+def minimax(locations, depth, maximizing):
+
+    # Base condition
+    # Stops recursion when depth becomes 0
+    if depth == 0 or len(locations) == 0:
+        return 0
+
+    # Maximizing player (Drone selecting best route)
+    if maximizing:
+
+        best = -math.inf
+
+        for loc in locations:
+
+            # Utility + recursive calculation
+            value = utility(loc) + minimax(
+                [x for x in locations if x != loc],
+                depth - 1,
+                False
+            )
+
+            # Select maximum utility
+            best = max(best, value)
+
+        return best
+
+    # Minimizing player (Obstacle/Risk)
+    else:
+
+        best = math.inf
+
+        for loc in locations:
+
+            value = -utility(loc) + minimax(
+                [x for x in locations if x != loc],
+                depth - 1,
+                True
+            )
+
+            # Select minimum value
+            best = min(best, value)
+
+        return best
+
+# Main Execution
+locations = list(delivery_points.keys())
+
+best_value = minimax(locations, 3, True)
+
+print("Best Utility Value for Drone Delivery:", best_value)
