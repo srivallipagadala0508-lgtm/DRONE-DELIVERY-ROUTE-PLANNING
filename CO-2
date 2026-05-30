@@ -1,0 +1,181 @@
+# ---------------------------------------------------
+# CO2 - Educational Search Trace
+# Drone Delivery Route Planning
+# Using Same Graph from CO1
+# ---------------------------------------------------
+
+
+delivery_graph = {
+    "Warehouse": ["ZoneA", "ZoneB"],
+    "ZoneA": ["ZoneC"],
+    "ZoneB": ["ZoneD"],
+    "ZoneC": ["Customer"],
+    "ZoneD": ["Customer"],
+    "Customer": []
+}
+
+# ---------------------------------------------------
+# Cost Values for Each Movement
+# g(n) value for moving from one node to another
+# ---------------------------------------------------
+
+cost = {
+    ("Warehouse", "ZoneA"): 3,
+    ("Warehouse", "ZoneB"): 5,
+    ("ZoneA", "ZoneC"): 4,
+    ("ZoneB", "ZoneD"): 2,
+    ("ZoneC", "Customer"): 2,
+    ("ZoneD", "Customer"): 4
+}
+
+# ---------------------------------------------------
+# Heuristic Values
+# h(n) = Estimated remaining cost to reach Customer
+# ---------------------------------------------------
+
+heuristic = {
+    "Warehouse": 6,
+    "ZoneA": 4,
+    "ZoneB": 5,
+    "ZoneC": 2,
+    "ZoneD": 3,
+    "Customer": 0
+}
+
+# ---------------------------------------------------
+# Routes from the same CO1 graph
+# ---------------------------------------------------
+
+route_1 = [
+    ("Warehouse", "ZoneA"),
+    ("ZoneA", "ZoneC"),
+    ("ZoneC", "Customer")
+]
+
+route_2 = [
+    ("Warehouse", "ZoneB"),
+    ("ZoneB", "ZoneD"),
+    ("ZoneD", "Customer")
+]
+
+# ---------------------------------------------------
+# UCS Calculation
+# f(n) = g(n)
+# ---------------------------------------------------
+
+def ucs_trace(route, route_name):
+
+    print("\n==============================")
+    print(f"UCS TRACE - {route_name}")
+    print("Formula: f(n) = g(n)")
+    print("==============================")
+
+    previous_g = 0
+
+    for step, (current, next_node) in enumerate(route, start=1):
+
+        new_g = cost[(current, next_node)]
+
+        total_g = previous_g + new_g
+
+        f = total_g
+
+        print(f"\nStep {step}: {current} -> {next_node}")
+        print(f"Previous g(n) : {previous_g}")
+        print(f"New g(n)      : {new_g}")
+        print(f"Total g(n)    : {previous_g} + {new_g} = {total_g}")
+        print(f"f(n)          : {f}")
+
+        previous_g = total_g
+
+    return previous_g
+
+# ---------------------------------------------------
+# A* Calculation
+# f(n) = g(n) + h(n)
+# ---------------------------------------------------
+
+def astar_trace(route, route_name):
+
+    print("\n==============================")
+    print(f"A* TRACE - {route_name}")
+    print("Formula: f(n) = g(n) + h(n)")
+    print("==============================")
+
+    previous_g = 0
+
+    for step, (current, next_node) in enumerate(route, start=1):
+
+        new_g = cost[(current, next_node)]
+
+        total_g = previous_g + new_g
+
+        h = heuristic[next_node]
+
+        f = total_g + h
+
+        print(f"\nStep {step}: {current} -> {next_node}")
+        print(f"Previous g(n) : {previous_g}")
+        print(f"New g(n)      : {new_g}")
+        print(f"Total g(n)    : {previous_g} + {new_g} = {total_g}")
+        print(f"h(n)          : {h}")
+        print(f"f(n)          : {total_g} + {h} = {f}")
+
+        previous_g = total_g
+
+    return previous_g
+
+# ---------------------------------------------------
+# Main Program
+# ---------------------------------------------------
+
+print("\n========================================")
+print("DRONE DELIVERY ROUTE PLANNING")
+print("CO2 - UCS AND A* TRACE")
+print("USING SAME GRAPH FROM CO1")
+print("========================================")
+
+print("\nGraph Representation:")
+for node, neighbours in delivery_graph.items():
+    print(f"{node} -> {neighbours}")
+
+print("\nAvailable Routes:")
+print("Route 1: Warehouse -> ZoneA -> ZoneC -> Customer")
+print("Route 2: Warehouse -> ZoneB -> ZoneD -> Customer")
+
+# UCS
+route1_ucs_cost = ucs_trace(route_1, "ROUTE 1")
+route2_ucs_cost = ucs_trace(route_2, "ROUTE 2")
+
+# A*
+route1_astar_cost = astar_trace(route_1, "ROUTE 1")
+route2_astar_cost = astar_trace(route_2, "ROUTE 2")
+
+# ---------------------------------------------------
+# Final Comparison
+# ---------------------------------------------------
+
+print("\n========================================")
+print("FINAL COMPARISON")
+print("========================================")
+
+print("\nUCS Results:")
+print("Route 1 Cost:", route1_ucs_cost)
+print("Route 2 Cost:", route2_ucs_cost)
+
+if route1_ucs_cost < route2_ucs_cost:
+    print("UCS Best Route: Warehouse -> ZoneA -> ZoneC -> Customer")
+else:
+    print("UCS Best Route: Warehouse -> ZoneB -> ZoneD -> Customer")
+
+print("\nA* Results:")
+print("Route 1 Final Cost:", route1_astar_cost)
+print("Route 2 Final Cost:", route2_astar_cost)
+
+print("\nBest Algorithm for Fastest Delivery:")
+print("A* Search is preferred because it uses both actual path cost g(n)")
+print("and estimated remaining cost h(n), which helps the drone make informed route decisions.")
+
+print("\n========================================")
+print("TRACE COMPLETED")
+print("========================================")
